@@ -39,4 +39,12 @@ public class ClientTests
         _outputhelper.WriteLine(response);
         Assert.True(apiService.IsConnect);
     }
+
+    [Fact]
+    public async void AssureCanGetVehiclesList()
+    {
+        ApiService apiService = _host.Services.GetRequiredService<ApiService>();
+        await apiService.Authenticate();
+        var vehicles = apiService.GetVehiclesList();
+    }
 }

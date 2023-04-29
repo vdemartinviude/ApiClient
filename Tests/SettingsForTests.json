@@ -7,7 +7,8 @@
         "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0Y3IiOiJjbnBqIiwidXNyIjoiNzQyMjk4MDgwMDAxODEiLCJwd2QiOiI1NDAwNDg3NDAwMDE0NiJ9.sufaqw7YqlbefQ5nu3nDFqfjYRQTRIrUnq44nbq0u_o"
     },
     "ApiParameters": {
-        "BaseUrl":"https://sauto.dsv.bradescoseguros.com.br:443/V2/Auth"
+        "BaseUrl":"https://sauto.dsv.bradescoseguros.com.br:443",
+        "AuthRoute":"V2/Auth"
     }
 
 }

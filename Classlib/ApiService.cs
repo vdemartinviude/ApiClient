@@ -1,16 +1,17 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
 namespace Classlib;
 public class ApiService
 {
     public bool IsConnect { get; private set; }
-    private string? _token;
-    private string? _refreshToken;
     private readonly string _baseUrl;
     private readonly AuthenticateParameters _authenticateParamters;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IConfiguration _configuration;
-    public ApiService(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    private AuthenticateResult? _authenticateResult;
+    private readonly ILogger<ApiService> _logger;
+    public ApiService(IHttpClientFactory httpClientFactory, IConfiguration configuration, ILogger<ApiService> logger)
     {
         _httpClientFactory = httpClientFactory;
         IsConnect = false;
@@ -18,6 +19,7 @@ public class ApiService
         _authenticateParamters = new();
         _configuration.GetSection("AuthenticationParameters").Bind(_authenticateParamters);
         _baseUrl = _configuration.GetRequiredSection("ApiParameters").GetValue<string>("BaseUrl")!;
+        _logger = logger;
     }
 
     public async Task<string> Authenticate()
@@ -35,7 +37,9 @@ public class ApiService
             } ;
 
             var content = new FormUrlEncodedContent(keyValues);
-            var request = new HttpRequestMessage(HttpMethod.Post,_baseUrl);
+            var uriBuilder = new UriBuilder(_baseUrl);
+            uriBuilder.Path = _configuration.GetRequiredSection("ApiParameters").GetValue<string>("AuthRoute");
+            var request = new HttpRequestMessage(HttpMethod.Post,uriBuilder.Uri);
             request.Content = content;
 
             var response = await httpClient.SendAsync(request);
@@ -43,11 +47,18 @@ public class ApiService
             {
                 throw new HttpRequestException("Was not possible to authenticate with API Provider!");
             }
-            var responseContent = await response.Content.ReadFromJsonAsync<AuthenticateResult>();
-
+            _authenticateResult = await response.Content.ReadFromJsonAsync<AuthenticateResult>();
+            _logger.LogInformation(_authenticateResult!.access_token!);
             IsConnect = true;
-            return responseContent!.access_token!;
+            return _authenticateResult!.access_token!;
             
         }
+    }
+
+    public string GetVehiclesList()
+    {
+        var xmlData = GetEmbeddedXmlFromResource.GetEmbeddedXmlContent("Classlib.Resources.VehicleListXmlRequest.xml");
+        _logger.LogInformation(xmlData);
+        return xmlData;
     }
 }

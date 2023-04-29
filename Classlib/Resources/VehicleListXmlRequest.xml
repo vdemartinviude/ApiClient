@@ -1,0 +1,11 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:veic="http://webservice.cotacaocsp.wsbl.bradseg.com.br/service/VeiculoService">
+   <soapenv:Header>
+      <veic:provedor>
+         <cnpj>69281590000174</cnpj>
+      </veic:provedor>
+   </soapenv:Header>
+   <soapenv:Body>
+      <veic:usuario>69281590000174</veic:usuario>
+      <veic:senha>DESENV</veic:senha>
+   </soapenv:Body>
+</soapenv:Envelope>
