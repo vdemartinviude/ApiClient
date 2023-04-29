@@ -1,0 +1,13 @@
+{
+    "AuthenticationParameters" : {
+        "grant_type":"client_credentials",
+        "scope":"web",
+        "client_secret":"9d0cef3e92e545a88f57a7e00dcbd5a3",
+        "client_id":"wsbl-bff-cics",
+        "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0Y3IiOiJjbnBqIiwidXNyIjoiNzQyMjk4MDgwMDAxODEiLCJwd2QiOiI1NDAwNDg3NDAwMDE0NiJ9.sufaqw7YqlbefQ5nu3nDFqfjYRQTRIrUnq44nbq0u_o"
+    },
+    "ApiParameters": {
+        "BaseUrl":"https://sauto.dsv.bradescoseguros.com.br:443/V2/Auth"
+    }
+
+}
