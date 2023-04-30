@@ -46,6 +46,6 @@ public class ClientTests
         ApiService apiService = _host.Services.GetRequiredService<ApiService>();
         await apiService.Authenticate();
         var vehicles = await apiService.GetVehiclesList();
-        _outputhelper.WriteLine(vehicles);
+        Assert.InRange(vehicles.Count(),10000,20000);
     }
 }
