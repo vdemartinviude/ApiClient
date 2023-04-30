@@ -8,7 +8,8 @@
     },
     "ApiParameters": {
         "BaseUrl":"https://sauto.dsv.bradescoseguros.com.br:443",
-        "AuthRoute":"V2/Auth"
+        "AuthRoute":"V2/Auth",
+        "ListVehicleRoute":"V2/WSBL-CotacaoCSP/service/VeiculoAutoWebService"
     }
 
 }

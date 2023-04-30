@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 namespace Classlib;
 public class ApiService
@@ -55,10 +56,32 @@ public class ApiService
         }
     }
 
-    public string GetVehiclesList()
+    public async Task<string> GetVehiclesList()
     {
+        if (!IsConnect)
+        {
+            throw new Exception("Not authenticated with API");
+        }
+        string vehicleList;
         var xmlData = GetEmbeddedXmlFromResource.GetEmbeddedXmlContent("Classlib.Resources.VehicleListXmlRequest.xml");
-        _logger.LogInformation(xmlData);
-        return xmlData;
+        using (var httpClient = _httpClientFactory.CreateClient())
+        {
+            httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer",_authenticateResult!.access_token!);
+                       
+            var content = new StringContent(xmlData,new MediaTypeHeaderValue("application/xml"));
+            var uriBuilder = new UriBuilder(_baseUrl);
+            uriBuilder.Path = _configuration.GetRequiredSection("ApiParameters").GetValue<string>("ListVehicleRoute");
+            var request = new HttpRequestMessage(HttpMethod.Post,uriBuilder.Uri); 
+            request.Content = content;
+
+            var response = await httpClient.SendAsync(request);
+            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                throw new HttpRequestException("Was not possible to get vehicles list");
+            }
+
+            vehicleList = await response.Content.ReadAsStringAsync();
+        }
+        return vehicleList;
     }
 }

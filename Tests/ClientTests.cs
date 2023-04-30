@@ -45,6 +45,7 @@ public class ClientTests
     {
         ApiService apiService = _host.Services.GetRequiredService<ApiService>();
         await apiService.Authenticate();
-        var vehicles = apiService.GetVehiclesList();
+        var vehicles = await apiService.GetVehiclesList();
+        _outputhelper.WriteLine(vehicles);
     }
 }
