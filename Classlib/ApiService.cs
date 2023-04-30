@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Xml;
 using Classlib.Model;
+using System.Globalization;
 
 namespace Classlib;
 public class ApiService
@@ -59,7 +60,7 @@ public class ApiService
         }
     }
 
-    public async Task<List<Vehicle>> GetVehiclesList()
+    public async Task<List<Veiculo>> GetVehiclesList()
     {
         if (!IsConnect)
         {
@@ -91,10 +92,24 @@ public class ApiService
             var xmllist = doc.SelectNodes("//veiculos");
             var nodelist = xmllist!.Cast<XmlNode>();
 
-            return nodelist.Select(x => new Vehicle {
-                Modelo = x.SelectSingleNode("modelo")!.InnerText,
-                Fipe = x.SelectSingleNode("fipe")!.InnerText,
-                Codigo = x.SelectSingleNode("codigo")!.InnerText
+            return nodelist.Select(x => {
+                var anos = new List<AnoTabela>();
+                var anosxml = x.SelectNodes("anos");
+                var anosnodes = anosxml!.Cast<XmlNode>();
+                anos.AddRange(anosnodes.Select(y => new AnoTabela 
+                {
+                    Ano = Convert.ToInt32(y.SelectSingleNode("ano")!.InnerText),
+                    ValorFipe = Convert.ToDouble(y.SelectSingleNode("valorFipe")!.InnerText),
+                    Vigencia = DateTime.ParseExact(y.SelectSingleNode("dataVigencia")!.InnerText,"yyyyMMdd",new CultureInfo("pt-BR"))
+                }).ToList());
+                
+                return new Veiculo 
+                {
+                    Modelo = x.SelectSingleNode("modelo")!.InnerText,
+                    Fipe = x.SelectSingleNode("fipe")!.InnerText,
+                    Codigo = x.SelectSingleNode("codigo")!.InnerText,
+                    Anos = anos
+                };
             }).ToList();
         }
     }
