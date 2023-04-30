@@ -4,6 +4,7 @@ using DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(BradescoApiDbContext))]
-    partial class BradescoApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230430195607_AddedYearsTable")]
+    partial class AddedYearsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,7 +60,7 @@ namespace DataAccess.Migrations
                     b.Property<double>("Value")
                         .HasColumnType("float");
 
-                    b.Property<Guid?>("VehicleModelId")
+                    b.Property<Guid>("VehicleModelId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Year")
@@ -74,7 +77,9 @@ namespace DataAccess.Migrations
                 {
                     b.HasOne("DataAccess.Model.VehicleModel", "VehicleModel")
                         .WithMany("Years")
-                        .HasForeignKey("VehicleModelId");
+                        .HasForeignKey("VehicleModelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("VehicleModel");
                 });

@@ -5,6 +5,7 @@ using System.Net.Http.Json;
 using System.Xml;
 using Classlib.Model;
 using System.Globalization;
+using DataAccess.Data;
 
 namespace Classlib;
 public class ApiService
@@ -16,7 +17,8 @@ public class ApiService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IConfiguration _configuration;
     private AuthenticateResult? _authenticateResult;
-    public ApiService(IHttpClientFactory httpClientFactory, IConfiguration configuration, ILogger<ApiService> logger)
+    private readonly BradescoApiDbContext _dbContext;
+    public ApiService(IHttpClientFactory httpClientFactory, IConfiguration configuration, ILogger<ApiService> logger, BradescoApiDbContext dbContext)
     {
         _httpClientFactory = httpClientFactory;
         IsConnect = false;
@@ -25,6 +27,7 @@ public class ApiService
         _configuration.GetSection("AuthenticationParameters").Bind(_authenticateParamters);
         _baseUrl = _configuration.GetRequiredSection("ApiParameters").GetValue<string>("BaseUrl")!;
         _logger = logger;
+        _dbContext = dbContext;
     }
 
     public async Task<string> Authenticate()
@@ -112,5 +115,10 @@ public class ApiService
                 };
             }).ToList();
         }
+    }
+
+    public Task PopulateVehicleTable()
+    {
+        throw new NotImplementedException();
     }
 }
