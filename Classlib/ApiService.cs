@@ -103,7 +103,7 @@ public class ApiService
                 anos.AddRange(anosnodes.Select(y => new AnoTabela 
                 {
                     Ano = Convert.ToInt32(y.SelectSingleNode("ano")!.InnerText),
-                    ValorFipe = Convert.ToDouble(y.SelectSingleNode("valorFipe")!.InnerText),
+                    ValorFipe = Convert.ToDouble(y.SelectSingleNode("valorFipe")!.InnerText,new CultureInfo("en-us")),
                     Vigencia = DateTime.ParseExact(y.SelectSingleNode("dataVigencia")!.InnerText,"yyyyMMdd",new CultureInfo("pt-BR"))
                 }).ToList());
                 
@@ -126,6 +126,16 @@ public class ApiService
     public async Task PopulateVehicleTable()
     {
         var vehicleList = await GetVehiclesList();
+
+        var MinEffectiness = vehicleList.SelectMany(x => x.Anos).Min(x => x.Vigencia);
+        var MaxEffectiness = vehicleList.SelectMany(x => x.Anos).Max(x => x.Vigencia);
+
+        var newquery = _dbContext.ApiQueryHistories.Add(new ()
+        {
+            QueryDate = DateTime.UtcNow,
+            MaxEffectiness = MaxEffectiness,
+            MinEffectiness = MinEffectiness
+        });
         foreach (var vec in vehicleList)
         {
             var vehicle = _dbContext.Vehicles.Add(new()
@@ -142,7 +152,8 @@ public class ApiService
                 GearMode = DomainDictionaries.GetCambio(vec.CodCambio),
                 Manufactur = DomainDictionaries.GetFabricante(vec.CodFabricante),
                 VehicleGroup = DomainDictionaries.GetGrupo(vec.CodGrupo),
-                VehicleKind = DomainDictionaries.GetTipo(vec.CodTipo)
+                VehicleKind = DomainDictionaries.GetTipo(vec.CodTipo),
+                QueryHistory = newquery.Entity
             });
             foreach(var year in vec.Anos)
             {

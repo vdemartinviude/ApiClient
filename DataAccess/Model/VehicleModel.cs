@@ -17,4 +17,5 @@ public class VehicleModel
     public int GroupCod {get;set;} = 0;
     public int KindCod {get;set;} = 0;
     public List<YearInfoModel>? Years { get; set;}
+    public VehicleApiQueryHistory QueryHistory { get; set;} = null!;
 }

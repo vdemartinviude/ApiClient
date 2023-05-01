@@ -9,6 +9,7 @@ public class BradescoApiDbContext : DbContext
     {
         
     }
-    public DbSet<VehicleModel>? Vehicles { get; set; }
-    public DbSet<YearInfoModel>? Years {get; set;}
+    public DbSet<VehicleModel> Vehicles { get; set; } = null!;
+    public DbSet<YearInfoModel> Years {get; set;} = null!;
+    public DbSet<VehicleApiQueryHistory> ApiQueryHistories {get; set;} = null!;
 }
