@@ -6,6 +6,7 @@ using System.Xml;
 using Classlib.Model;
 using System.Globalization;
 using DataAccess.Data;
+using Classlib.Dictionaries;
 
 namespace Classlib;
 public class ApiService
@@ -111,14 +112,50 @@ public class ApiService
                     Modelo = x.SelectSingleNode("modelo")!.InnerText,
                     Fipe = x.SelectSingleNode("fipe")!.InnerText,
                     Codigo = x.SelectSingleNode("codigo")!.InnerText,
+                    CodCambio = Convert.ToInt32(x.SelectSingleNode("cambio")!.InnerText),
+                    CodCombustivel = Convert.ToInt32(x.SelectSingleNode("combustivel")!.InnerText),
+                    CodFabricante = Convert.ToInt32(x.SelectSingleNode("codigoFabricante")!.InnerText),
+                    CodGrupo = Convert.ToInt32(x.SelectSingleNode("grupoVeiculo")!.InnerText),
+                    CodTipo = Convert.ToInt32(x.SelectSingleNode("tipoVeiculo")!.InnerText),
                     Anos = anos
                 };
             }).ToList();
         }
     }
 
-    public Task PopulateVehicleTable()
+    public async Task PopulateVehicleTable()
     {
-        throw new NotImplementedException();
+        var vehicleList = await GetVehiclesList();
+        foreach (var vec in vehicleList)
+        {
+            var vehicle = _dbContext.Vehicles.Add(new()
+            {
+                Model = vec.Modelo,
+                FipeCod = vec.Fipe,
+                BradescoApiCode = vec.Codigo,
+                GasCod = vec.CodCombustivel,
+                GearCod = vec.CodCambio,
+                KindCod = vec.CodTipo,
+                GroupCod = vec.CodGrupo,
+                ManufacturCod = vec.CodFabricante,
+                GasKind = DomainDictionaries.GetCombustivel(vec.CodCombustivel),
+                GearMode = DomainDictionaries.GetCambio(vec.CodCambio),
+                Manufactur = DomainDictionaries.GetFabricante(vec.CodFabricante),
+                VehicleGroup = DomainDictionaries.GetGrupo(vec.CodGrupo),
+                VehicleKind = DomainDictionaries.GetTipo(vec.CodTipo)
+            });
+            foreach(var year in vec.Anos)
+            {
+                _dbContext.Years.Add(new ()
+                {
+                    Year = year.Ano,
+                    Value = year.ValorFipe,
+                    Effectiveness = year.Vigencia,
+                    VehicleModel = vehicle.Entity
+                });
+            }
+
+        }
+        await _dbContext.SaveChangesAsync();
     }
 }

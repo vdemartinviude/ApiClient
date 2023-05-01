@@ -4,6 +4,7 @@ using DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(BradescoApiDbContext))]
-    partial class BradescoApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230430203918_AddedComplementaryFields")]
+    partial class AddedComplementaryFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,32 +39,17 @@ namespace DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("GasCod")
-                        .HasColumnType("int");
-
                     b.Property<string>("GasKind")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("GearCod")
-                        .HasColumnType("int");
 
                     b.Property<string>("GearMode")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("GroupCod")
-                        .HasColumnType("int");
-
-                    b.Property<int>("KindCod")
-                        .HasColumnType("int");
-
                     b.Property<string>("Manufactur")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ManufacturCod")
-                        .HasColumnType("int");
 
                     b.Property<string>("Model")
                         .IsRequired()
