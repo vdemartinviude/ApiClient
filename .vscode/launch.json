@@ -19,6 +19,15 @@
             "stopAtEntry": false
         },
         {
+            "name": "VehicleApi",
+            "type": "coreclr",
+            "request":"launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/VehicleWebApi/bin/Debug/net7.0/VehicleWebApi.dll",
+            "console":"internalConsole"
+            
+        },
+        {
             "name": ".NET Core Attach",
             "type": "coreclr",
             "request": "attach"

@@ -7,6 +7,9 @@ using Classlib.Model;
 using System.Globalization;
 using DataAccess.Data;
 using Classlib.Dictionaries;
+using Microsoft.EntityFrameworkCore;
+using F23.StringSimilarity;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Classlib;
 public class ApiService
@@ -18,8 +21,10 @@ public class ApiService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IConfiguration _configuration;
     private AuthenticateResult? _authenticateResult;
-    private readonly BradescoApiDbContext _dbContext;
-    public ApiService(IHttpClientFactory httpClientFactory, IConfiguration configuration, ILogger<ApiService> logger, BradescoApiDbContext dbContext)
+    //private readonly BradescoApiDbContext _dbContext;
+
+    private readonly IServiceScopeFactory _scopeFactory;
+    public ApiService(IHttpClientFactory httpClientFactory, IConfiguration configuration, ILogger<ApiService> logger, IServiceScopeFactory scopeFactory)
     {
         _httpClientFactory = httpClientFactory;
         IsConnect = false;
@@ -28,7 +33,7 @@ public class ApiService
         _configuration.GetSection("AuthenticationParameters").Bind(_authenticateParamters);
         _baseUrl = _configuration.GetRequiredSection("ApiParameters").GetValue<string>("BaseUrl")!;
         _logger = logger;
-        _dbContext = dbContext;
+        _scopeFactory = scopeFactory;
     }
 
     public async Task<string> Authenticate()
@@ -125,10 +130,13 @@ public class ApiService
 
     public async Task PopulateVehicleTable()
     {
+        var scope = _scopeFactory.CreateScope();
+        var _dbContext = scope.ServiceProvider.GetRequiredService<BradescoApiDbContext>();
+        
         var vehicleList = await GetVehiclesList();
 
-        var MinEffectiness = vehicleList.SelectMany(x => x.Anos).Min(x => x.Vigencia);
-        var MaxEffectiness = vehicleList.SelectMany(x => x.Anos).Max(x => x.Vigencia);
+        var MinEffectiness = vehicleList.SelectMany(x => x.Anos!).Min(x => x.Vigencia);
+        var MaxEffectiness = vehicleList.SelectMany(x => x.Anos!).Max(x => x.Vigencia);
 
         var newquery = _dbContext.ApiQueryHistories.Add(new ()
         {
@@ -140,9 +148,9 @@ public class ApiService
         {
             var vehicle = _dbContext.Vehicles.Add(new()
             {
-                Model = vec.Modelo,
-                FipeCod = vec.Fipe,
-                BradescoApiCode = vec.Codigo,
+                Model = vec.Modelo!,
+                FipeCod = vec.Fipe!,
+                BradescoApiCode = vec.Codigo!,
                 GasCod = vec.CodCombustivel,
                 GearCod = vec.CodCambio,
                 KindCod = vec.CodTipo,
@@ -155,7 +163,7 @@ public class ApiService
                 VehicleKind = DomainDictionaries.GetTipo(vec.CodTipo),
                 QueryHistory = newquery.Entity
             });
-            foreach(var year in vec.Anos)
+            foreach(var year in vec.Anos!)
             {
                 _dbContext.Years.Add(new ()
                 {
@@ -168,5 +176,32 @@ public class ApiService
 
         }
         await _dbContext.SaveChangesAsync();
+        scope.Dispose();
+    }
+
+    public async Task<List<string>> GetListOfModels(string modelreference,string details)
+    {
+        var scope = _scopeFactory.CreateScope();
+        var _dbContext = scope.ServiceProvider.GetRequiredService<BradescoApiDbContext>();
+        var jw = new JaroWinkler();
+        var models = await _dbContext.Vehicles.Select(x => new
+        {
+            Id = x.Id,
+            Model = x.Model
+        })
+        .Where(x => x.Model.Contains(modelreference.ToUpper()))
+        .ToListAsync();
+
+        var list = models.Select(s => new {
+            s.Model,
+            similarity = jw.Distance(s.Model.ToUpper(),(modelreference+details).ToUpper())
+        })
+        .OrderBy(x => x.similarity)
+        .Select(x => x.Model)
+        .Take(10)
+        .ToList();
+
+        return list;
+        
     }
 }

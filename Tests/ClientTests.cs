@@ -70,4 +70,15 @@ public class ClientTests
         await apiService.Authenticate();
         await apiService.PopulateVehicleTable();
     }
+    [Fact]
+    public async void AssureCanGetModelsInOrderOfDistance()
+    {
+        ApiService apiService = _host.Services.GetRequiredService<ApiService>();
+        List<string> models = await apiService.GetListOfModels("KICKS","1.8");
+
+        foreach(var model in models)
+        {
+            _outputhelper.WriteLine(model);
+        }
+    }
 }
